@@ -36,3 +36,16 @@
     transform: rotate(360deg);
   }
 }
+
+body {
+  font-size: 16px;
+}
+
+h1#main-title {
+  text-align: center;
+  flex-wrap: wrap;
+  font-family: "Playwrite DK Loopet", cursive;
+  font-optical-sizing: auto;
+  font-weight: 200;
+  font-style: normal;
+}

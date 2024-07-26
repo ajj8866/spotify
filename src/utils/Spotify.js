@@ -18,8 +18,7 @@ class Spotify {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
         this.accessUri = 'https://accounts.spotify.com/api/token';
-        this.getToken();
-        this.getTokenInterval();
+        this.initializeToken();
         
     }
 
@@ -40,23 +39,26 @@ class Spotify {
     }
 
     getTokenInterval() {
-        return new Promise((resolve, reject) => {
-            setInterval(() => this.getToken(), 1000*3600)
-            resolve("Obtained new access token")
-        })
+        setTimeout(async () => {
+            await this.getToken();
+            this.getTokenInterval()
+        }, 1000*3600)
+    }
 
+    async initializeToken() {
+        await this.getToken();
+        this.getTokenInterval();
     }
 
     async basicEndpoint(uri) {
         while (!this.accessToken) {
-            await this.getToken()
+            await this.getToken();
         }
         const response = await fetch("https://api.spotify.com/v1/" + uri, {
             method: 'GET',
             headers: { 'Authorization': 'Bearer ' + this.accessToken },
           });
         const json = await response.json();
-        jsonParser(json);
         return json
     }
 
@@ -72,18 +74,38 @@ class Spotify {
 
     async getInfo(name, type) {
         const json = await this.basicEndpoint(`search?q=${encodeURIComponent(name)}&type=${type}`);
-        return json.artists.items.id
+        jsonParser(json);
+        return json.artists.items[0].id
     }
 
     async getArtist(name) {
-        const artistId = await this.getInfo(name, 'artist')
+        const artistId = await this.getInfo(name, 'artist');
         const json = await this.basicEndpoint(`artists/${artistId}`);
-        jsonParser(json)
         return json
+    }
+
+    async getRelatedArtists(name) {
+        const artistId = await this.getInfo(name, 'artist');
+        // console.log(artistId);
+        const artistsRelated = await this.basicEndpoint(`artists/${artistId}/related-artists`);
+        // jsonParser(artistsRelated);
+        class relatedArtist {
+            constructor(key, name, popularity) {
+                this.key = key;
+                this.name = name;
+                this.popularity = popularity;
+            }
+        };
+
+        const relArtistArray = [];
+        // console.log(artistsRelated);
+        artistsRelated.artists.forEach((element, idx) => {
+            relArtistArray.push(new relatedArtist(`rel-artist${idx+1}` ,element.name, element.popularity));
+            console.log(`rel-artist${idx+1}`);
+        });
+
+        return relArtistArray;
     }
 };
 
 export default Spotify;
-
-const spot = new Spotify(process.env["SPOTIFYSECRET"], process.env["SPOTIFYCLIENTID"], "http://localhost:4000/callback");
-spot.getArtist('adele');
