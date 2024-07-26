@@ -19,19 +19,23 @@ function App() {
       if (artist.trim() === '') {
           alert("Enter some value")
       };
-
       try {
           const artistQuery = await spot.getRelatedArtists(artist);
-          // for (const [k, v] in Object.entries(artistQuery)) {
-          //     console.log(`${k}: ${v}`)
-          // }
-          // const relatedList = artistQuery.map(el => el.name);
           setRelatedArtists(artistQuery)
       } catch(err) {
           console.log(err)
       }
-  }
+  };
 
+  const handleSelectChange = (event) =>  {
+    let temp = [...relatedArtists];
+    if (event.target.value === 'name') {
+      sortByKey(temp, 'name', false);
+    } else {
+      sortByKey(temp, 'popularity', true)
+    }
+    setRelatedArtists(temp)
+  }
   
   return (
     <body>
@@ -44,9 +48,9 @@ function App() {
         {relatedArtists.length>0 && 
         (
           <div>
-            <select>
-              <option>Name</option>
-              <option>Popularity</option>
+            <select value='popularity' onChange={handleSelectChange}>
+              <option key='name-sort' value='name'>Name</option>
+              <option key='populatiry-sort' value='popularity'>Popularity</option>
             </select>
             <table className='related-artists-container'>
               <thead className="table-th">
