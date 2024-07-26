@@ -2,6 +2,7 @@ import Spotify from './utils/Spotify';
 import React, { useState } from "react";
 import SearchArtist from './components/Artists/artists';
 import './App.css';
+import { sortByKey } from './utils/utilityFunctions';
 
 function App() {
 
@@ -31,16 +32,7 @@ function App() {
       }
   }
 
-  let nullRef = 0;
   
-  const nullHandler = (el) => {
-    if (el.key) {
-      return el.key
-    } else {
-      nullRef++;
-      return `nullRef-${nullRef}`
-    }
-  }
   return (
     <body>
       <div className="App">
@@ -48,9 +40,35 @@ function App() {
           <h1 id="main-title">Jam Stats</h1>
         </div>
         <SearchArtist handleButtonClick={handleArtistButtonClick} handleInputChange={handleArtistInputChange}/>
-        <ul className='related-artists-container'>
-          {relatedArtists.map(el => <li key={nullHandler(el)}>{el.name}</li>)}
-        </ul>
+
+        {relatedArtists.length>0 && 
+        (
+          <div>
+            <select>
+              <option>Name</option>
+              <option>Popularity</option>
+            </select>
+            <table className='related-artists-container'>
+              <thead className="table-th">
+                <tr>
+                  <th>Name</th>
+                  <th>Popularity</th>           
+                </tr>
+              </thead>
+              <tbody>
+                {
+                  relatedArtists.map((el) => (
+                    <tr>
+                      <td key={el.name_key}>{el.name}</td>
+                      <td key={el.pop_key}>{el.popularity}</td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
+      )}
+
       </div>
     </body>
   );

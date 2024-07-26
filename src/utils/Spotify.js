@@ -90,17 +90,17 @@ class Spotify {
         const artistsRelated = await this.basicEndpoint(`artists/${artistId}/related-artists`);
         // jsonParser(artistsRelated);
         class relatedArtist {
-            constructor(key, name, popularity) {
-                this.key = key;
+            constructor(name_key, pop_key, name, popularity) {
+                this.name_key = name_key;
+                this.pop_key = pop_key;
                 this.name = name;
                 this.popularity = popularity;
             }
         };
 
         const relArtistArray = [];
-        // console.log(artistsRelated);
         artistsRelated.artists.forEach((element, idx) => {
-            relArtistArray.push(new relatedArtist(`rel-artist${idx+1}` ,element.name, element.popularity));
+            relArtistArray.push(new relatedArtist(`rel-artist${idx+1}`, `pop-key${idx+1}`, element.name, element.popularity));
             console.log(`rel-artist${idx+1}`);
         });
 
