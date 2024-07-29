@@ -20,4 +20,9 @@ export function sortByKey(array, key, reverse) {
             return 0; 
             });
     }
-}  
+};
+
+// export function renderArtist(artist_key) {
+//     const el = document.getElementById(artist_key);
+    
+// }

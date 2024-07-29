@@ -86,9 +86,9 @@ class Spotify {
 
     async getRelatedArtists(name) {
         const artistId = await this.getInfo(name, 'artist');
-        // console.log(artistId);
+        
         const artistsRelated = await this.basicEndpoint(`artists/${artistId}/related-artists`);
-        // jsonParser(artistsRelated);
+        
         class relatedArtist {
             constructor(name_key, pop_key, name, popularity) {
                 this.name_key = name_key;
@@ -105,6 +105,27 @@ class Spotify {
         });
 
         return relArtistArray;
+    }
+
+    async getArtistTracks(name) {
+        const artistId = await this.getInfo(name, 'artist');
+        const artistTracks = await this.basicEndpoint(`artists/${artistId}/top-tracks`);
+        const trackInfo = [];
+        
+        class TrackClass {
+            constructor (album_id, album_image, album_name) {
+                this.album_id = album_id;
+                this.album_image = album_image;
+                this.album_name = album_name;
+            }
+        }
+        artistTracks.tracks.forEach((val, idx) => {
+            trackInfo.push(
+                new TrackClass(idx+1, val.album.images[0].url, val.album.name)
+            )
+        })
+
+        return artistTracks
     }
 };
 
