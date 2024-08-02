@@ -1,3 +1,5 @@
 input#artist_entry {
-    padding: 10px;
+    padding: 5px;
+    margin: 20px;
+    margin-right: 10px;
 }

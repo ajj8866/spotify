@@ -52,6 +52,7 @@ function App() {
         {relatedArtists.length>0 && 
         (
           <div>
+            <label id='sorting' for='sort-options'>Sort By</label>
             <select id='sort-options' onChange={handleSelectChange}>
               <option key='name-sort' value='name'>Name</option>
               <option key='populatiry-sort' value='popularity'>Popularity</option>
@@ -80,12 +81,10 @@ function App() {
                     }
                   </tbody>
                 </table>                                
-                {trackList.length>0 &&
-                  <table id='tracks-table'>
-                    <tbody>
-                      {renderArtist(trackList)}
-                    </tbody>
-                  </table>
+                {trackList.length>0 &&                  
+                  <ul id='tracks-list'>                    
+                      {renderArtist(trackList)}                    
+                    </ul>                  
                 }
               </div>
             </div>          
