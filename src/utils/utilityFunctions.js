@@ -1,3 +1,5 @@
+import React from "react";
+
 export function sortByKey(array, key, reverse) {
     if (!reverse) {
         return array.sort((a, b) => {
@@ -22,7 +24,11 @@ export function sortByKey(array, key, reverse) {
     }
 };
 
-// export function renderArtist(artist_key) {
-//     const el = document.getElementById(artist_key);
-    
-// }
+export function renderArtist(artist_list) {
+    return artist_list.map((el) => 
+            <tr id={el.album_id}>
+                <td>{el.album_name}</td>
+                <td><img alt={`Album cover for ${el.album_name}`}  src={el.album_image}></img></td>
+            </tr>
+    )
+};

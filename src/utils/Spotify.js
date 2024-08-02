@@ -74,7 +74,7 @@ class Spotify {
 
     async getInfo(name, type) {
         const json = await this.basicEndpoint(`search?q=${encodeURIComponent(name)}&type=${type}`);
-        jsonParser(json);
+        // jsonParser(json);§
         return json.artists.items[0].id
     }
 
@@ -101,7 +101,7 @@ class Spotify {
         const relArtistArray = [];
         artistsRelated.artists.forEach((element, idx) => {
             relArtistArray.push(new relatedArtist(`rel-artist${idx+1}`, `pop-key${idx+1}`, element.name, element.popularity));
-            console.log(`rel-artist${idx+1}`);
+            // console.log(`rel-artist${idx+1}`);
         });
 
         return relArtistArray;
@@ -124,8 +124,8 @@ class Spotify {
                 new TrackClass(idx+1, val.album.images[0].url, val.album.name)
             )
         })
-
-        return artistTracks
+        console.log(trackInfo);
+        return trackInfo
     }
 };
 
