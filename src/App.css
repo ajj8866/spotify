@@ -37,8 +37,9 @@ table.related-artists-container {
   background-color: #6495ED;
 }
 
-thead {
+thead.table-th > tr > th {
   font-size: 24px;
+  padding: 10px;
 }
 
 tr:nth-child(even) {
@@ -51,4 +52,14 @@ tr:nth-child(odd) {
 
 td {
   padding: 20px;
+}
+
+table#tracks-table {
+  border: none;
+  
+}
+
+img.album-image {
+  width: 100px;
+  height: 100px;
 }

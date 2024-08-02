@@ -26,9 +26,9 @@ export function sortByKey(array, key, reverse) {
 
 export function renderArtist(artist_list) {
     return artist_list.map((el) => 
-            <tr id={el.album_id}>
+            <tr className="track-row" id={el.album_id}>
                 <td>{el.album_name}</td>
-                <td><img alt={`Album cover for ${el.album_name}`}  src={el.album_image}></img></td>
+                <td><img className="album-image" alt={`Album cover for ${el.album_name}`}  src={el.album_image}></img></td>
             </tr>
     )
 };

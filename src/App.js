@@ -68,8 +68,7 @@ function App() {
                   </thead>
                   <tbody>
                     {
-                      relatedArtists.map((el) => (
-                        <div>
+                      relatedArtists.map((el) => (                        
                         <tr>
                           <td onClick={async () => {
                             let newArtist = await spot.getArtistTracks(el.name)                  
@@ -77,18 +76,17 @@ function App() {
                           }} key={el.name_key} className='rel-artist-name'>{el.name}</td>
                           <td key={el.pop_key}>{el.popularity}</td>
                         </tr>
-                        {trackList.length>0 &&
-                          <table>
-                            <tbody>
-                              {renderArtist(trackList)}
-                            </tbody>
-                          </table>
-                        }
-                        </div>
                       ))
                     }
                   </tbody>
-                </table>
+                </table>                                
+                {trackList.length>0 &&
+                  <table id='tracks-table'>
+                    <tbody>
+                      {renderArtist(trackList)}
+                    </tbody>
+                  </table>
+                }
               </div>
             </div>          
           </div>
