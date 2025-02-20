@@ -1,15 +1,4 @@
-function jsonParser(obj) {
-    for (const [key, val] of Object.entries(obj)) {
-        if (typeof val === 'object') {
-            if (val == null) {
-                continue
-            }
-            jsonParser(val)
-        } else {
-            console.log(key + ": " + val)
-        }
-    }
-}
+const REACT_PORT = 3001;
 
 class Spotify {
 
@@ -18,10 +7,22 @@ class Spotify {
         this.clientId = clientId;
         this.redirectUri = redirectUri;
         this.accessUri = 'https://accounts.spotify.com/api/token';
+        this.authEndpoint = `https://accounts.spotify.com/authorize`;
+        this.tokenEndpoint = 'https://accounts.spotify.com/api/token';
+        this.loginEndpoint = `http://localhost:${REACT_PORT}/login`
+        this.token = null;
+        this.accessToken = null;
+        this.refreshToken = null;
         this.initializeToken();
+        this.code_verifier = this.generateCodeVerifier();
+        // this.code_challenge = await this.generateCodeChallenge(this.code_verifier)
         
     }
 
+    /////////////////////////////////////////////////////////////////////////
+    // BASIC AUTHORIZATIO USING CLIENT CREDENTAILS
+
+    // Method to yield basic functionality of app without user having to login
     async getToken() {
         const response = await fetch( this.accessUri, {
         method: 'POST',
@@ -34,7 +35,7 @@ class Spotify {
         },
         });
         const json = await response.json();
-        this.accessToken = json.access_token;
+        this.token = json.access_token;
         return json.accessToken;
     }
 
@@ -61,6 +62,8 @@ class Spotify {
         const json = await response.json();
         return json
     }
+
+    //////////////////////////////////////////////////////////////////
 
     async  getTrackInfo(name) {
         const trackId = await this.getInfo(name, 'track')
@@ -126,6 +129,74 @@ class Spotify {
         })
         console.log(trackInfo);
         return trackInfo
+    }
+
+    //////////////////////////////////////////////////////
+    // AUTHO CODE FLOW PROCESS
+
+    generateCodeVerifier() {
+        /*
+        Generates random string which is base64 URL-encoded using the btoa method 
+         */                
+        const array = new Uint8Array(32); // Initiates array of 32 elements each of which represents a single byte instantiated with 0's
+        window.crypto.getRandomValues(array); // Method used to form cryptographically strong random values based off a 
+        return btoa(String.fromCharCode.apply(null, array)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');    // Appplies base64 URL encoding 
+    }
+
+    async generateCodeChallenge(codeVerifier) {
+        /*
+        Creates a hash based of randomly generated string 
+        */
+        const hashed = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
+        return btoa(String.fromCharCode(...new Uint8Array(hashed)))
+            .replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');
+    }
+
+    async refreshAccessToken() {
+
+    }
+
+    async login() {
+
+        const code_challenge = await this.generateCodeChallenge(this.code_verifier);
+
+        const authUrl = `${this.authEndpoint}?${new URLSearchParams({
+            response_type: 'code',
+            client_id: this.clientId,
+            scope: 'user-read-private user-read-email',
+            redirect_uri: this.redirectUri,
+            code_challenge_method: 'S256',
+            code_challenge: code_challenge,
+        
+        })}`;
+        
+        window.location.href = authUrl;
+
+
+    }
+
+    async handleCallback() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        if (!code) return;
+
+        const response = await fetch(this.tokenEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: new URLSearchParams({
+                client_id: this.clientId,
+                grant_type: 'authorization_code',
+                code,
+                redirect_uri: this.redirectUri,
+                code_verifier: this.code_verifier
+            })
+        });
+
+        const data = await response.json();
+        this.accessToken = data.accessToken;
+        this.refreshToken = data.refresh_token;
+        localStorage.setItem('access_token', data.access_token);
+        localStorage.setItem('refresh_token', data.refresh_token);
     }
 };
 
