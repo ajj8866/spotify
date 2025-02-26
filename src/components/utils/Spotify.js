@@ -76,18 +76,38 @@ class Spotify {
     }
 
     async getInfo(name, type) {
+        /*
+        * Used to get Spotify ID or URL pertaining to a given entitty where entity type is one of 
+        * (i) artist (ii) track (iii) album (iv) playlist (v) show (for podcasts) (vi) episode (vii) user
+        * and the value for the type query parameter and q value of the query parameter corresponds to the 
+        * name of the entity 
+        */
         const json = await this.basicEndpoint(`search?q=${encodeURIComponent(name)}&type=${type}`);
-        // jsonParser(json);§
         return json.artists.items[0].id
     }
 
     async getArtist(name) {
+        /*
+        * Yields information pertainin to the associated artist where information returned in the form of JSON with the 
+        * following properties
+        * (i) genres: List
+        * (ii) images: List of objects where each object has url, height and width properties
+        * (iii) name: Name of artist 
+        * (iv) popularity: Popularity score 
+        */
         const artistId = await this.getInfo(name, 'artist');
         const json = await this.basicEndpoint(`artists/${artistId}`);
         return json
     }
 
     async getRelatedArtists(name) {
+        /*
+        * Yields an array of objects each of which contains information relating to an artist with properties including:
+        * (i) genres: List of string
+        * (ii) images: List of objects which have url, heigh and width
+        * (iii) name: Name of artist
+        * (iv) populatiry 
+         */
         const artistId = await this.getInfo(name, 'artist');
         
         const artistsRelated = await this.basicEndpoint(`artists/${artistId}/related-artists`);
@@ -111,6 +131,9 @@ class Spotify {
     }
 
     async getArtistTracks(name) {
+        /*
+        
+        */
         const artistId = await this.getInfo(name, 'artist');
         const artistTracks = await this.basicEndpoint(`artists/${artistId}/top-tracks`);
         const trackInfo = [];
@@ -136,8 +159,8 @@ class Spotify {
 
     generateCodeVerifier() {
         /*
-        Generates random string which is base64 URL-encoded using the btoa method 
-         */                
+        * Generates random string which is base64 URL-encoded using the btoa method 
+        */                
         const array = new Uint8Array(32); // Initiates array of 32 elements each of which represents a single byte instantiated with 0's
         window.crypto.getRandomValues(array); // Method used to form cryptographically strong random values based off a 
         return btoa(String.fromCharCode.apply(null, array)).replace(/=/g, '').replace(/\+/g, '-').replace(/\//g, '_');    // Appplies base64 URL encoding 
@@ -145,7 +168,7 @@ class Spotify {
 
     async generateCodeChallenge(codeVerifier) {
         /*
-        Creates a hash based of randomly generated string 
+        * Creates a hash based of randomly generated string 
         */
         const hashed = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(codeVerifier));
         return btoa(String.fromCharCode(...new Uint8Array(hashed)))
@@ -153,13 +176,31 @@ class Spotify {
     }
 
     async refreshAccessToken() {
+        const refresh_token = localStorage.getItem('refresh_token');
+        if (!refresh_token) return;
+
+        const body = new URLSearchParams({
+            grant_type: 'refresh_token',
+            refresh_token,
+            client_id: this.client_id
+        });
+
+        const response = await fetch(this.token_url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+        });
+
+        const data = await response.json();
+        if (data.access_token) {
+            localStorage.setItem('access_token', data.access_token);
+            this.accessToken = data.accessToken;
+        }
 
     }
 
     async login() {
-
         const code_challenge = await this.generateCodeChallenge(this.code_verifier);
-
         const authUrl = `${this.authEndpoint}?${new URLSearchParams({
             response_type: 'code',
             client_id: this.clientId,
@@ -171,14 +212,14 @@ class Spotify {
         })}`;
         
         window.location.href = authUrl;
-
-
     }
 
     async handleCallback() {
         const urlParams = new URLSearchParams(window.location.search);
         const code = urlParams.get('code');
-        if (!code) return;
+        if (!code) {
+            return false
+        };
 
         const response = await fetch(this.tokenEndpoint, {
             method: 'POST',
@@ -193,11 +234,84 @@ class Spotify {
         });
 
         const data = await response.json();
-        this.accessToken = data.accessToken;
+        this.accessToken = data.access_token;
         this.refreshToken = data.refresh_token;
         localStorage.setItem('access_token', data.access_token);
         localStorage.setItem('refresh_token', data.refresh_token);
+
+        return true``
     }
+
+    // Endpoint using PKCE as login mechanism // 
+    async getUserEndpoint(end_params) {
+        /**
+         * Stub function used in subsequent methods to simplify process of extracting API 
+         * endpoints pertaining to user profile
+         * 
+         */
+        const token = localStorage.getItem('access_token');
+        if (!token) return null;
+
+        const basicUrl = 'https://api.spotify.com/v1/me';
+        const response = await fetch(end_params ? basicUrl + end_params :  basicUrl, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+
+        if (response.status === 401) {
+            await this.refreshAccessToken(); 
+            return this.getUserEndpoint(); 
+        }
+        return await response.json();
+    }
+
+    async getRecommendedArtists(genre, popularity = 0) {
+        /**
+         * Yields recommded list of artists based of artists currently in users playlist
+         */
+
+        // Array of objects pertaining to individual artists in users playlist including name and ID properties
+        const response = await this.getUserEndpoint("/following?type=artist");
+        const data = response.json().items; 
+        
+        // Creating an array of objects where each object contains the name and ID pertaining to artist
+        const artistIds = [];
+        data.forEach(async (i) => {
+            const mainArtistId = await this.getInfo(i.name, 'artist');
+            console.log(this);
+            artistIds.push({'name': i.name, 'artist_id': mainArtistId});
+        });
+
+        // Instantiates empty object which shall store information relating to artist in users playlist 
+        // where each object is indexed by the artist currently in users playlist and associated values 
+        // contains an array of objects containing related artists filtered by user provided genre and popularity 
+        const recommendedArtistsObj = {};
+
+        artistIds.forEach(async (art_obj, idx) => {
+            const curArtist = art_obj.name;
+            const artistInfo = await this.basicEndpoint(`artists/${art_obj.artist_id}/related-artists`);
+            console.log("Parsing for " + curArtist);
+            const relArtistArray = artistInfo.artists;
+            recommendedArtistsObj[curArtist] = [];
+
+            relArtistArray.forEach( (el, idx) => {
+                if (genre || popularity) {                    
+                    const pop = el.popularity;
+                    const genre_ls = el.genres;
+                    if ( (pop > popularity) && (genre_ls.includes(genre))  ) {
+                        recommendedArtistsObj[curArtist].push({
+                            "name_key": `rel-artist${idx+1}`,
+                            "pop_key": `pop-key${idx+1}`,
+                            "name": el.name,
+                            "popularity": el.popularity
+                        })
+                    }
+                };
+            } )
+
+        })
+
+    }
+    
 };
 
 export default Spotify;
