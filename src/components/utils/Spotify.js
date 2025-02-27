@@ -106,7 +106,7 @@ class Spotify {
         * (i) genres: List of string
         * (ii) images: List of objects which have url, heigh and width
         * (iii) name: Name of artist
-        * (iv) populatiry 
+        * (iv) popularity 
          */
         const artistId = await this.getInfo(name, 'artist');
         
@@ -131,9 +131,14 @@ class Spotify {
     }
 
     async getArtistTracks(name) {
-        /*
-        
-        */
+        /**
+         * Yields the top tracks released by artist specified in the name parameter returning an 
+         * array of objects pertaining to the relevant album where each object has the following 
+         * properties
+         * i) album_id
+         * ii) album_image
+         * iii) album_name
+         */
         const artistId = await this.getInfo(name, 'artist');
         const artistTracks = await this.basicEndpoint(`artists/${artistId}/top-tracks`);
         const trackInfo = [];
@@ -182,7 +187,7 @@ class Spotify {
         const body = new URLSearchParams({
             grant_type: 'refresh_token',
             refresh_token,
-            client_id: this.client_id
+            client_id: this.clientId
         });
 
         const response = await fetch(this.token_url, {

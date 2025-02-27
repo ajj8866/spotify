@@ -31,3 +31,5 @@ const GetUserRecommendations = ( props ) => {
         </div>
     )
 }
+
+export default GetUserRecommendations;
