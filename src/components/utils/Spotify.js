@@ -14,7 +14,7 @@ class Spotify {
         this.accessToken = null;
         this.refreshToken = null;
         this.initializeToken();
-        this.code_verifier = this.generateCodeVerifier();
+        // this.code_verifier = this.generateCodeVerifier();
         // this.code_challenge = await this.generateCodeChallenge(this.code_verifier)
         
     }
@@ -34,7 +34,9 @@ class Spotify {
             'Authorization': 'Basic ' +  btoa(this.clientId + ':' + this.clientSecret),
         },
         });
+        
         const json = await response.json();
+        console.log(json);
         this.token = json.access_token;
         return json.accessToken;
     }
@@ -126,7 +128,7 @@ class Spotify {
             relArtistArray.push(new relatedArtist(`rel-artist${idx+1}`, `pop-key${idx+1}`, element.name, element.popularity));
             // console.log(`rel-artist${idx+1}`);
         });
-
+        console.log(relArtistArray);
         return relArtistArray;
     }
 

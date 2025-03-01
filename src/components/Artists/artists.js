@@ -13,31 +13,36 @@ const SearchArtist = (props) => {
      * v) handlArtistTrackChange: Changes the specific related artist for which reltaed tracks are displayed 
      */
 
-    const { handleInputChange, handleButtonClick, populateRelatedArtists, artistTrackList, handleSelectChange } = props;
+    const { handleInputChange, handleArtistSubmit, artistTrackList, handleSelectChange, relatedArtist } = props;
 
     return (
         <div>
-            <label htmlFor='artist_entry'>Enter Artist Name</label>
-            <input id='artist_entry' type='text' onChange={handleInputChange}></input>
-            <input type="button" value="Submit" onClick={handleButtonClick}></input>
+            <form onSubmit={handleArtistSubmit}>
+              <label htmlFor='artist_entry'>Enter Artist Name</label>
+              <input id='artist_entry' type='text' onChange={handleInputChange}></input>
+              <input type="button" value="Submit" ></input>
+            </form>
+
             <div>
-            <label id='sorting' for='sort-options'>Sort By</label>
+            <label id='sorting' htmlFor='sort-options'>Sort By</label>
             <select id='sort-options' onChange={handleSelectChange}>
               <option key='name-sort' value='name'>Name</option>
-              <option key='populatiry-sort' value='popularity'>Popularity</option>
+              <option key='popularity-sort' value='popularity'>Popularity</option>
             </select>
 
-            <div id='output-container'>
+             <div id='output-container'>
               <div id='table-container'>
-                <table className='related-artists-container'>
+                {relatedArtist.length>0 && <table className='related-artists-container'>
                   <thead className="table-th">
                     <tr>
                       <th>Name</th>
                       <th>Popularity</th>           
                     </tr>
                   </thead>
-                  <tbody>{populateRelatedArtists}</tbody>
-                </table>                                
+                  <tbody id="related-artists-body"></tbody>
+                </table> }
+              
+
                 {artistTrackList.length>0 &&                  
                     <ul id='tracks-list'>                    
                       {renderArtist(artistTrackList)}                    

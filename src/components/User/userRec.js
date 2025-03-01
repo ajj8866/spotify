@@ -9,7 +9,7 @@ const GetUserRecommendations = ( props ) => {
         <div>
             <form onClick={handleOpts}>
                 <div className="form-group">
-                    <label for="genre-select">Select Genre: </label>
+                    <label htmlFor="genre-select">Select Genre: </label>
                     <select id="genre-select" className="form-control">
                         <option value="all"></option>                    
                         <option value="rock"></option>
@@ -23,7 +23,7 @@ const GetUserRecommendations = ( props ) => {
                 </div>
 
                 <div>
-                    <label for="min-popularity">Popularity Threshold: </label>
+                    <label htmlFor="min-popularity">Popularity Threshold: </label>
                     <input id="min-popularity" type="number" className="form-control"></input>
                     <small>Select the minimal poprularity rating for related artists</small>
                 </div>

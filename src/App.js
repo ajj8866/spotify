@@ -23,16 +23,32 @@ function App() {
     // param nothing happens. Should code be provided it implies user has been redirected 
     // from login having called the handleCallback function and user information available 
     if (urlParams.get('code')) {
-      spot.handleCallback();
+      const isLoggedIn = spot.current.handleCallback();
+      setLoggedIn(isLoggedIn);
     }
-  }, [loggedIn]);
+
+    const populateWithRelatedArtistTracks = async (event) => {
+      /**
+       * Populates table with track pertaining to related artist clicked on        
+       */
+      event.preventDefault();
+      const newTrackList = await spot.current.getArtistTracks(event.target.value);
+      setTrack(newTrackList); // Automatically populates ul with ID tracks-list with tracks due to change in state      
+
+    };
+
+
+  }, [loggedIn, relatedArtists, trackList]);
 
   const handleArtistInputChange = (event) => {
-      const isLoggedIn = setArtist(event.target.value);
-      setLoggedIn(isLoggedIn);
+    console.log("Artist: ");
+    console.log(artist);
+      setArtist(event.target.value);
+      // setLoggedIn(isLoggedIn);
   };
 
-  const handleArtistButtonClick = async (event) => {
+  const handleArtistButtonSubmit = async (event) => {
+    /** */
       event.preventDefault()
       if (artist.trim() === '') {
           alert("Enter some value")
@@ -41,11 +57,21 @@ function App() {
 
           // Uses target artist to yield a list of related artists using setting the
           // array yielded to equal to the state for relatedArtists
-          const artistQuery = await spot.getRelatedArtists(artist);
-          setRelatedArtists(artistQuery)
+          const artistQuery = await spot.current.getRelatedArtists(artist);
+          setRelatedArtists(artistQuery);
+          const artistsTableId = document.getElementById("related-artists-body");
+          relatedArtists.forEach((el) => {
+            const newArtistRow = (
+              <tr>
+                <td key={el.name_key}>{el.name}</td>
+                <td key={el.pop_key} >{el.popularity}</td>
+              </tr>
+            );
+            artistsTableId.append(newArtistRow);
+          })
 
           //  Tracks for target artist initially populate accompanying table 
-          const initTracks = await spot.getArtistTracks(artist);
+          const initTracks = await spot.current.getArtistTracks(artist);
           setTrack(initTracks)
 
       } catch(err) {
@@ -63,28 +89,32 @@ function App() {
     setRelatedArtists(temp)
   };
 
-  const populateWithRelatedArtists = () => {
-    (relatedArtists.map((el) => (                        
-      <tr>
-        <td onClick={async () => {
-          let newArtist = await spot.getArtistTracks(el.name)                  
-          setTrack(newArtist)
-        }} key={el.name_key} className='rel-artist-name'>{el.name}</td>
-        <td key={el.pop_key}>{el.popularity}</td>
-      </tr>
-    ))
-  )}
   
   return (
       <div className="App">
         <h1 id="main-title">
           <span>Jam Stats</span> 
-          <button id='login-button' onClick={() => spot.login()}>Login</button>
+          <button id='login-button' onClick={() => spot.current.login()}>Login</button>
         </h1>                
-        <SearchArtist handleButtonClick={handleArtistButtonClick} handleInputChange={handleArtistInputChange} populateRelatedArtists={populateWithRelatedArtists} artistTrackList={trackList} handleSelectChange ={handleSelectChange} />
+        <SearchArtist handleArtistSubmit={handleArtistButtonSubmit} handleInputChange={handleArtistInputChange} artistTrackList={trackList} handleSelectChange ={handleSelectChange} relatedArtists={relatedArtists} />
         <GetUserRecommendations />
       </div>
   );
 }
 
 export default App;
+
+
+// const trackList = document.getElementById("tracks-list");
+    // (relatedArtists.forEach((el) => {                        
+    //   const curRow = (<tr>
+    //     <td onClick={async () => {
+    //       let newArtist = await spot.current.getArtistTracks(el.name)                  
+    //       setTrack(newArtist)
+    //     }} key={el.name_key} className='rel-artist-name'>{el.name}</td>
+    //     <td key={el.pop_key}>{el.popularity}</td>
+    //   </tr>);
+
+    //   trackList.append(curRow);
+    // })
+    // )
