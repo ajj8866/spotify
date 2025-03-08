@@ -13,7 +13,7 @@ function App() {
 
   const [artist, setArtist] = useState('');
   const [relatedArtists, setRelatedArtists] = useState([]);
-  const [trackList, setTrack] = useState([]);
+  const [trackList, setTrack] = useState([]); // Initially set to main artist and updates to populate with related artists on click
   const [loggedIn, setLoggedIn ] = useState(false);
 
   useEffect(() => {
@@ -27,28 +27,20 @@ function App() {
       setLoggedIn(isLoggedIn);
     }
 
-    const populateWithRelatedArtistTracks = async (event) => {
-      /**
-       * Populates table with track pertaining to related artist clicked on        
-       */
-      event.preventDefault();
-      const newTrackList = await spot.current.getArtistTracks(event.target.value);
-      setTrack(newTrackList); // Automatically populates ul with ID tracks-list with tracks due to change in state      
-
-    };
-
-
-  }, [loggedIn, relatedArtists, trackList]);
+  }, [loggedIn, relatedArtists, trackList, artist]);
 
   const handleArtistInputChange = (event) => {
     console.log("Artist: ");
     console.log(artist);
-      setArtist(event.target.value);
+    setArtist(event.target.value);
+    console.log(artist);
+    console.log(event.target.value);
       // setLoggedIn(isLoggedIn);
   };
 
   const handleArtistButtonSubmit = async (event) => {
     /** */
+      console.log("Current Artits: " + artist);
       event.preventDefault()
       if (artist.trim() === '') {
           alert("Enter some value")
@@ -118,3 +110,15 @@ export default App;
     //   trackList.append(curRow);
     // })
     // )
+
+
+
+    // const populateWithRelatedArtistTracks = async (event) => {
+    //   /**
+    //    * Populates table with track pertaining to related artist clicked on        
+    //    */
+    //   event.preventDefault();
+    //   const newTrackList = await spot.current.getArtistTracks(event.target.value);
+    //   setTrack(newTrackList); // Automatically populates ul with ID tracks-list with tracks due to change in state      
+
+    // };

@@ -24,8 +24,8 @@ export function sortByKey(array, key, reverse) {
     }
 };
 
-export function renderArtist(artist_list) {
-    return artist_list.map((el) => 
+export function renderArtistTrackList(artist_track_list) {
+    return artist_track_list.map((el) => 
         <li key={el.album_id}>
             <h2>{el.album_name}</h2>
             <img className="album-image" alt={`Album cover for ${el.album_name}`}  src={el.album_image}></img>

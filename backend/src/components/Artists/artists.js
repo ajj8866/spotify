@@ -1,6 +1,6 @@
 import React from "react";
 import './artist.css';
-import { renderArtist } from "../utils/utilityFunctions";
+import { renderArtistTrackList } from "../utils/utilityFunctions";
 
 const SearchArtist = (props) => {
     /**
@@ -19,8 +19,8 @@ const SearchArtist = (props) => {
         <div>
             <form onSubmit={handleArtistSubmit}>
               <label htmlFor='artist_entry'>Enter Artist Name</label>
-              <input id='artist_entry' type='text' onChange={handleInputChange}></input>
-              <input type="button" value="Submit" ></input>
+              <input id='artist_entry' type='text' onChange={handleInputChange}></input>              
+              <button type="submit">Submit</button>
             </form>
 
             <div>
@@ -32,7 +32,7 @@ const SearchArtist = (props) => {
 
              <div id='output-container'>
               <div id='table-container'>
-                {relatedArtist.length>0 && <table className='related-artists-container'>
+                {relatedArtist>0 && <table className='related-artists-container'>
                   <thead className="table-th">
                     <tr>
                       <th>Name</th>
@@ -45,7 +45,7 @@ const SearchArtist = (props) => {
 
                 {artistTrackList.length>0 &&                  
                     <ul id='tracks-list'>                    
-                      {renderArtist(artistTrackList)}                    
+                      {renderArtistTrackList(artistTrackList)}                    
                     </ul>                  
                 }
               </div>

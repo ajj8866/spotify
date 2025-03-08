@@ -24,21 +24,32 @@ class Spotify {
 
     // Method to yield basic functionality of app without user having to login
     async getToken() {
-        const response = await fetch( this.accessUri, {
-        method: 'POST',
-        body: new URLSearchParams({
-            'grant_type': 'client_credentials',
-        }),
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Authorization': 'Basic ' +  btoa(this.clientId + ':' + this.clientSecret),
-        },
-        });
+        // const response = await fetch( this.accessUri, {
+        // method: 'POST',
+        // body: new URLSearchParams({
+        //     'grant_type': 'client_credentials',
+        // }),
+        // headers: {
+        //     'Content-Type': 'application/x-www-form-urlencoded',
+        //     'Authorization': 'Basic ' +  btoa(this.clientId + ':' + this.clientSecret),
+        // },
+        // });
         
-        const json = await response.json();
-        console.log(json);
-        this.token = json.access_token;
-        return json.accessToken;
+        // const json = await response.json();
+        // console.log(json);
+        // this.token = json.access_token;
+        // return json.accessToken;
+        try {
+            const response = await fetch("http://localhost:4000/get-token");
+            if (!response.ok) throw new Error("Failed to fetch token");
+            const data = await response.json();
+            this.token = data.accessToken            
+            return data.access_token;            
+        } catch (error) {
+            console.error("Error fetching token:", error);
+            return null;
+        }
+    
     }
 
     getTokenInterval() {
